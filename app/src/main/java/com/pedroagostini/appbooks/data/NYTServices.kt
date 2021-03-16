@@ -7,7 +7,7 @@ import retrofit2.http.Query
 
 interface NYTServices {
 
-    @GET("list.json")
+    @GET("lists.json")
     fun getBooks(
         @Query("api-key") apiKey: String = "VUSUda4pocGq0fZAbzmQWo3GEv4OyydF",
         @Query("list") list: String = "hardcover-fiction"
