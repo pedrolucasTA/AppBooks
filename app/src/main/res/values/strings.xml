@@ -2,8 +2,11 @@
     <string name="app_name">AppBooks</string>
 
     <string name="books_title">Books</string>
-    <string name="books_title_details">Books Details</string>
+    <string name="books_error_401">Não autorizado</string>
+    <string name="books_error_400_generic">Erro não tratado</string>
+    <string name="books_error_500_generic">Erro catastrófico</string>
 
+    <string name="books_title_details">Books Details</string>
     <string name="books_details_title_label">Title</string>
     <string name="books_details_description_label">Description</string>
 </resources>

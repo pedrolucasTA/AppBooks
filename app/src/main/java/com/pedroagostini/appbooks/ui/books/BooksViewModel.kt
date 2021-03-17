@@ -4,6 +4,7 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.pedroagostini.appbooks.R
 import com.pedroagostini.appbooks.data.ApiService
 import com.pedroagostini.appbooks.data.model.Book
 import com.pedroagostini.appbooks.data.response.BookBodyResponse
@@ -14,6 +15,7 @@ import retrofit2.Response
 class BooksViewModel : ViewModel() {
 
     val booksLiveData: MutableLiveData<List<Book>> = MutableLiveData()
+    val viewFlipperLiveData: MutableLiveData<Pair<Int, Int?>> = MutableLiveData()
 
     fun getBooks() {
 
@@ -25,35 +27,45 @@ class BooksViewModel : ViewModel() {
                 call: Call<BookBodyResponse>,
                 response: Response<BookBodyResponse>
             ) {
-                if (response.isSuccessful) {
-                    val books: MutableList<Book> = mutableListOf()
+                when {
+                    response.isSuccessful -> {
+                        val books: MutableList<Book> = mutableListOf()
 
-                    response.body()?.let { bookBodyResponse ->
-                        for (result in bookBodyResponse.bookResults) {
-                            val book = Book(
-                                title = result.bookDetailResponses[0].title,
-                                author = result.bookDetailResponses[0].author,
-                                description = result.bookDetailResponses[0].description
-                            )
+                        response.body()?.let { bookBodyResponse ->
+                            for (result in bookBodyResponse.bookResults) {
+                                val book = result.bookDetailResponses[0].getBookModel()
+                                books.add(book)
+                            }
 
-                            books.add(book)
                         }
 
+                        booksLiveData.value = books
+                        viewFlipperLiveData.value = Pair(VIEW_FLIPPER_BOOKS, null)
                     }
-
-                    booksLiveData.value = books
-
-                    Log.i(TAG, "onResponse: Aqui, ${books[0]}")
+                    response.code() == 401 -> {
+                        viewFlipperLiveData.value = Pair(VIEW_FLIPPER_ERROR, R.string.books_error_401)
+                    }
+                    else -> {
+                        viewFlipperLiveData.value = Pair(VIEW_FLIPPER_ERROR, R.string.books_error_400_generic)
+                    }
                 }
             }
 
-
             override fun onFailure(call: Call<BookBodyResponse>, t: Throwable) {
-
+                viewFlipperLiveData.value = Pair(VIEW_FLIPPER_ERROR, R.string.books_error_500_generic)
             }
         })
 
     }
+
+    companion object {
+        private const val VIEW_FLIPPER_BOOKS = 1
+        private const val VIEW_FLIPPER_ERROR = 2
+    }
+
+}
+
+
 
 //    fun createFakeBooks(): List<Book>{
 //        return listOf(
@@ -62,4 +74,3 @@ class BooksViewModel : ViewModel() {
 //            Book("O Senhor dos Anéis", "John Ronald Reuel Tolkien", "description")
 //        )
 //    }
-}
